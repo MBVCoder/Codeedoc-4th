@@ -68,3 +68,33 @@ export default tseslint.config([
 ])
 ```
 # Codeedoc-4th
+
+
+create-room => roomId
+join-room => roomId
+add-track => { tracks }
+update-tracks => { tracks }
+update-current-playing => { index }
+update-playing-status => { value }
+
+
+
+tracks structure
+ {
+      "id": "1750667621456",
+      "title": "YouTube Video (VsFpt0NA8ug)",
+      "url": "https://youtu.be/VsFpt0NA8ug?feature=shared",
+      "videoId": "VsFpt0NA8ug"
+    }
+
+
+
+
+export const extractYouTubeId = (url: string): string | null => {
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+  const match = url.match(regExp);
+  return match && match[2].length === 11 ? match[2] : null;
+};
+
+
+https://viewed-investing-forces-marks.trycloudflare.com
