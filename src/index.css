@@ -1,0 +1,8 @@
+@import "tailwindcss";
+
+.text-header {
+  color:transparent;
+  -webkit-background-clip: text;
+  background-clip: text;
+  background-image: linear-gradient(to right, rgb(147, 61, 245), rgb(207, 255, 241));
+}
