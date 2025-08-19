@@ -9,8 +9,11 @@ const Room = () => {
   const [videoUrl, setVideoUrl] = useState("");
   const [trackName, setTrackName] = useState("");
   const [tracks, setTracks] = useState<any[]>([]);
+  const [isClearState, setIsClearState] = useState(false);
   const navigate = useNavigate();
   const roomId = useParams().roomId;
+
+  const handleDelete= ()=>{}
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -39,22 +42,23 @@ const Room = () => {
   };
 
   useEffect(() => {
-    if (!socket.connected) {
+    if (!socket.connected || isClearState) {
       navigate("/"); // Redirect to SelectRole
     }
-
-    socket.on(
-      "room-tracks",
-      (data: { id: string; title: string; url: string; videoId: string }[]) => {
-        setTracks(data);
-      },
-    );
+    socket.on("clear-state", () => {
+      setIsClearState((prev) => !prev);
+      toast.error("Host Leave the Room");
+    });
+    socket.on("room-tracks", (data) => {
+      setTracks(data);
+    });
 
     return () => {
       socket.off("disconnect");
+      socket.off("clear-state");
       socket.off("room-tracks");
     };
-  }, [roomId, navigate,tracks]);
+  }, [roomId, navigate,isClearState]);
 
   return (
     <div className="bg-black flex flex-col justify-center items-center 2xl:h-screen px-10">
@@ -107,9 +111,18 @@ const Room = () => {
           </div>
           <div className=" 2xl:col-span-3 p-5 border-2 border-white rounded-2xl">
             <ul>
-              {tracks.map((track) => (
-                <li key={track.id} className="text-white my-2">
+              {tracks?.map((track) => (
+                <li key={track.id} className="text-white my-2 flex gap-10 items-center">
                   🎵 {track.title}
+                  {/* {track.url} */}
+                  <div className="bg-white px-3 py-1 text-black  rounded-2xl" >
+                    <button className="text-sm flex justify-center items-center" onClick={handleDelete}>Delete</button>
+                  </div>
+                  {track.isPlaying && (
+                    <span className="text-white bg-red-500 rounded-full px-2 py-1">
+                      🎧
+                    </span>
+                  )}
                 </li>
               ))}
             </ul>
