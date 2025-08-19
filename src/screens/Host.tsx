@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { socket } from "../config/Socket";
+import { socket } from "../config/socket";
 import { toast } from "react-toastify";
 
 const Host = () => {
@@ -12,10 +12,18 @@ const Host = () => {
       toast.error("Please enter a Room ID");
       return;
     }
-
-    socket.emit("create-room", roomId);
+    socket.emit("create-room", { roomId });
     navigate(`/room/${roomId}`);
   };
+
+  useEffect(() => {
+    if (!socket.connected) {
+      navigate("/"); // Redirect to SelectRole
+    }
+    return () => {
+      socket.off("create-room");
+    };
+  }, []);
 
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-black">

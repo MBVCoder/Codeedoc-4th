@@ -98,3 +98,6 @@ export const extractYouTubeId = (url: string): string | null => {
 
 
 https://viewed-investing-forces-marks.trycloudflare.com
+
+
+protocol port : http://192.168.29.238:6001/

@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState , useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { socket } from "../config/Socket";
+import { socket } from "../config/socket";
 import { toast } from "react-toastify";
 
 
@@ -13,10 +13,34 @@ const Member = () => {
       toast.error("Please enter a Room ID");
       return;
     }
-		socket.emit("join-room", roomId);
+		socket.emit("join-room",roomId);
+		socket.once("join-room", (data) => {
+			if (data.type === "ERROR") {
+				toast.error(data.message);
+				navigate(`/`);
+			}else{
+				toast.success("Joined the room");
+				navigate(`/room/${roomId}`);
+			}
+		});
+
+		useEffect(() => {
+    // Cleanup socket listener on unmount to avoid memory leaks
+    return () => {
+      socket.off("join-room");
+    };
+  }, []);
 		
-    navigate(`/room/${roomId}`);
   };
+
+	useEffect(() => {
+    if (!socket.connected) {
+      navigate("/"); // Redirect to SelectRole
+    }
+    return () => {
+      socket.off("create-room");
+    };
+  }, []);
 	return (
 		<div className="flex flex-col items-center justify-center h-screen bg-black">
 			<div className="bg-white/30 backdrop-blur-2xl p-5 rounded-lg flex flex-col items-center justify-around h-40">

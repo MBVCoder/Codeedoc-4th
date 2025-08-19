@@ -1,14 +1,17 @@
 import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
-import { socket } from "../config/Socket";
+import { socket } from "../config/socket";
 import { extractYouTubeId } from "../config/extractid";
+import { useNavigate } from "react-router-dom";
 
 const Room = () => {
   const [videoUrl, setVideoUrl] = useState("");
   const [trackName, setTrackName] = useState("");
   const [tracks, setTracks] = useState<any[]>([]);
+  const navigate = useNavigate();
   const roomId = useParams().roomId;
+
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     console.log("new track added");
@@ -36,15 +39,22 @@ const Room = () => {
   };
 
   useEffect(() => {
-    socket.emit("create-room", roomId);
-    // socket.emit("update-tracks", { tracks: [] });
-    socket.on("room-tracks", (tracksFromServer) => {
-      setTracks(tracksFromServer);
-    });
+    if (!socket.connected) {
+      navigate("/"); // Redirect to SelectRole
+    }
+
+    socket.on(
+      "room-tracks",
+      (data: { id: string; title: string; url: string; videoId: string }[]) => {
+        setTracks(data);
+      },
+    );
+
     return () => {
+      socket.off("disconnect");
       socket.off("room-tracks");
     };
-  }, [roomId]);
+  }, [roomId, navigate,tracks]);
 
   return (
     <div className="bg-black flex flex-col justify-center items-center 2xl:h-screen px-10">
